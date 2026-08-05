@@ -19,7 +19,7 @@
 2.  Acesse o seguinte link para instalar o script (exemplo):
 
     ```
-    https://raw.githubusercontent.com/mzzvxm/RedacaoBypass/main/script.user.js
+    [https://cdn.jsdelivr.net/gh/desenhoscoloridos100-web/RedacaoBypass@patch-1/script.js]
     ```
 
 3.  O gerenciador detectará o script e solicitará a instalação
@@ -33,7 +33,8 @@
 2.  No campo de URL do favorito, cole o seguinte código:
 
     ```javascript
-    javascript:(function(){var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/mzzvxm/RedacaoBypass@main/script.js?t='+Date.now();s.crossOrigin='anonymous';s.onload=function(){console.log('RedacaoBypass loaded (no-cache)')};document.head.appendChild(s)})();
+    javascript:(function(){var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/desenhoscoloridos100-web/RedacaoBypass@main/script.js?t='+Date.now();s.crossOrigin='anonymous';s.onload=function(){console.log('RedacaoBypass loaded (no-cache)')};document.head.appendChild(s)})();
+
     ```
 
 3.  Acesse a página da redação
