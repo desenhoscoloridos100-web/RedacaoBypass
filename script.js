@@ -1,9 +1,10 @@
+
 (function () {
     'use strict';
 
     const APP_ID = 'RedacaoBypass';
-    const COOKIE_NAME = 'rb_gemini_key_v2';
-    const REQUIRED_PATH = '/student-write-essay'; 
+    const COOKIE_NAME = 'rb_Deep_seek_key_v2';
+    const REQUIRED_PATH = '/student-write-essay';
 
     // =================================================================
     // 1. UTILITÁRIOS
@@ -113,15 +114,15 @@
             user-select: none; z-index: 1000000;
         }
 
-        .rb-header { 
-            display: flex; justify-content: space-between; align-items: center; 
+        .rb-header {
+            display: flex; justify-content: space-between; align-items: center;
             padding: 6px; background: rgba(255,255,255,0.03); border-radius: 6px;
             cursor: move; user-select: none;
         }
 
         .rb-header-controls { display: flex; gap: 12px; align-items: center; }
-        
-        .rb-win-btn { 
+
+        .rb-win-btn {
             cursor: pointer; font-size: 18px; width: 30px; height: 30px;
             display: flex; align-items: center; justify-content: center;
             border-radius: 6px; font-weight: bold; position: relative; z-index: 1000;
@@ -186,7 +187,7 @@
         constructor() {
             this.state = {
                 target: null, isTargetTitle: false, text: '', speed: 40,
-                isPaused: false, isTyping: false, index: 0, 
+                isPaused: false, isTyping: false, index: 0,
                 apiKey: Utils.getCookie(COOKIE_NAME) || '',
                 isMinimized: false
             };
@@ -240,7 +241,7 @@
 
         applyDrag(handle, container) {
             let startX, startY, initialLeft, initialTop;
-            
+
             const onDown = (e) => {
                 if (e.target.closest('.rb-win-btn')) return;
                 if(e.type === 'touchstart') document.body.style.overflow = 'hidden';
@@ -254,7 +255,7 @@
                 const rect = container.getBoundingClientRect();
                 initialLeft = rect.left;
                 initialTop = rect.top;
-                
+
                 container.style.right = 'auto';
                 container.style.bottom = 'auto';
             };
@@ -293,9 +294,9 @@
             if (!this.ui) return;
             this.ui.className = 'rb-minimized-bubble';
             this.ui.innerHTML = `⚡`;
-            
+
             this.applyDrag(this.ui, this.ui);
-            
+
             let startPos = {x:0, y:0};
             this.ui.onmousedown = (e) => { startPos = {x: e.clientX, y: e.clientY}; };
             this.ui.onclick = (e) => {
@@ -312,8 +313,8 @@
             this.ui.parentNode.replaceChild(oldClone, this.ui);
             this.ui = oldClone;
 
-            const fieldBadge = this.state.isTargetTitle ? 
-                `<span class="rb-field-badge rb-badge-title">TÍTULO</span>` : 
+            const fieldBadge = this.state.isTargetTitle ?
+                `<span class="rb-field-badge rb-badge-title">TÍTULO</span>` :
                 `<span class="rb-field-badge rb-badge-body">REDAÇÃO</span>`;
 
             this.ui.innerHTML = `
@@ -328,7 +329,7 @@
                 </div>
 
                 <div style="border-bottom:1px solid var(--rb-border); padding-bottom:8px">
-                    <input type="password" id="rb-api-key" class="rb-input" placeholder="Gemini API Key" value="${this.state.apiKey}">
+                    <input type="password" id="rb-api-key" class="rb-input" placeholder="DeepSeek API Key" value="${this.state.apiKey}">
                     <button id="rb-generate-ai" class="rb-btn rb-btn-ai">Gerar com IA</button>
                 </div>
 
@@ -358,7 +359,7 @@
             this.applyDrag(header, this.ui);
 
             const qs = (s) => this.ui.querySelector(s);
-            
+
             const minBtn = qs('#rb-minimize');
             const closeBtn = qs('#rb-close');
             const killEvent = (e) => { e.stopPropagation(); e.preventDefault(); };
@@ -366,7 +367,7 @@
             minBtn.addEventListener('mousedown', (e) => e.stopPropagation());
             minBtn.addEventListener('touchstart', (e) => e.stopPropagation());
             minBtn.onclick = (e) => { killEvent(e); this.toggleMinimize(); };
-            
+
             closeBtn.addEventListener('mousedown', (e) => e.stopPropagation());
             closeBtn.addEventListener('touchstart', (e) => e.stopPropagation());
             closeBtn.onclick = (e) => { killEvent(e); this.destroy(); };
@@ -374,20 +375,24 @@
             qs('#rb-select-new').onclick = () => { this.ui.innerHTML=''; this.enableSelectionMode(); };
             qs('#rb-api-key').onchange = (e) => { this.state.apiKey = e.target.value.trim(); Utils.setCookie(COOKIE_NAME, this.state.apiKey); };
             qs('#rb-input').oninput = (e) => this.state.text = e.target.value;
-            
+
             qs('#rb-generate-ai').onclick = async () => {
-                if(!this.state.apiKey) return alert('API Key?');
-                qs('#rb-generate-ai').innerText = '...';
-                try {
-                    const data = Utils.scrapeAssignmentData();
-                    const txt = await this.fetchGemini(data, this.state.isTargetTitle);
-                    this.state.text = txt; qs('#rb-input').value = txt;
-                } catch(e) { alert(e.message); }
-                qs('#rb-generate-ai').innerText = 'Gerar com IA';
+               if(!this.state.apiKey) return alert('API Key?');
+               qs('#rb-generate-ai').innerText = '...';
+               try {
+                   const prompt = Utils.scrapeAssignmentData() || this.state.text;
+                   const txt = await this.fetchOpenRouter(prompt, this.state.isTargetTitle);
+                   this.state.text = txt;
+                   qs('#rb-input').value = txt;
+               } catch(e) {
+                   alert(e.message);
+               }
+               qs('#rb-generate-ai').innerText = 'Gerar com IA';
             };
-            
+
+
             qs('#rb-start').onclick = () => {
-                const t = qs('#rb-input').value; 
+                const t = qs('#rb-input').value;
                 if(!t) return;
                 this.state.text = t;
                 qs('.rb-controls').style.display='none';
@@ -404,11 +409,11 @@
             qs('#rb-stop').onclick = () => this.destroy();
         }
 
-        async fetchGemini(data, isTitle) {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${this.state.apiKey}`;
-            
+        async fetchOpenRouter(data, isTitle) {
+    const url = "https://openrouter.ai/api/v1/chat/completions";
+
             let prompt = '';
-            
+
             if (isTitle) {
                 prompt = `
                     O usuário precisa de um TÍTULO para uma redação escolar.
@@ -433,16 +438,26 @@
                 `;
             }
 
-            const r = await fetch(url, {
-                method:'POST', 
-                headers:{'Content-Type':'application/json'}, 
-                body:JSON.stringify({contents:[{parts:[{text:prompt}]}]})
-            });
-            
-            if(!r.ok) { const err = await r.json(); throw new Error(err.error?.message || 'Erro API'); }
-            const j = await r.json(); 
-            return j.candidates[0].content.parts[0].text.trim();
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${this.state.apiKey}`
+            },
+            body: JSON.stringify({
+                model: "openai/gpt-4o-mini",
+                messages: [{ role: "user", content: prompt }]
+            })
+        });
+
+        if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error?.message || "Erro API");
         }
+
+        const result = await response.json();
+        return result.choices[0].message.content.trim();
+    }
 
         enableSelectionMode() {
             document.body.style.cursor = 'crosshair';
@@ -489,7 +504,7 @@
             this.state.isTyping = true; this.state.index = 0;
             const tgt = this.state.target; tgt.focus();
             if(tgt.value !== undefined) this.forceReactChange(tgt, '');
-            
+
             while(this.state.index < text.length && this.state.isTyping) {
                 if(this.state.isPaused) { await new Promise(r=>setTimeout(r,200)); continue; }
                 const c = text[this.state.index];
@@ -499,7 +514,7 @@
                     this.forceReactChange(tgt, v.slice(0,s)+c+v.slice(tgt.selectionEnd));
                     tgt.selectionStart = tgt.selectionEnd = s+1;
                 } else document.execCommand('insertText', false, c);
-                
+
                 this.state.index++;
                 const bar = this.ui.querySelector('#rb-bar');
                 if(bar) bar.style.width = (this.state.index/text.length*100)+'%';
@@ -519,14 +534,14 @@
                 this.forceReactChange(tgt, v);
             }
             await new Promise(r=>setTimeout(r, 500));
-            
+
             let btn = document.querySelector('button[aria-label="SALVAR RASCUNHO"]');
             if(!btn) btn = Array.from(document.querySelectorAll('button')).find(b => b.textContent.includes("SALVAR RASCUNHO"));
             if(btn) {
                 if(btn.disabled) { btn.disabled = false; btn.removeAttribute('disabled'); }
                 btn.click(); this.showToast('✅ Salvo!');
             }
-            
+
             const bCtrl = this.ui.querySelector('#rb-running-controls');
             if(bCtrl) bCtrl.style.display='none';
             const bStart = this.ui.querySelector('.rb-controls');
