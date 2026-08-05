@@ -4,7 +4,7 @@
 
 ## 🚀 Funcionalidades
 
-  * **IA Integrada (Gemini 2.0)**: Gera redações completas ou títulos criativos baseados no tema proposto
+  * **IA Integrada (Gpt-4o-mini)**: Gera redações completas ou títulos criativos baseados no tema proposto
   * **Contexto Inteligente**: Detecta automaticamente se o campo é um título ou o corpo da redação
   * **Digitação Humanizada**: Simula a digitação tecla por tecla com velocidade variável
   * **Dark Mode Automático**: Injeta proteção visual para uso noturno
@@ -47,8 +47,8 @@
 
 Para usar a geração automática de texto, você precisa configurar sua chave de API uma única vez:
 
-1.  Gere sua chave gratuita no [Google AI Studio](https://aistudio.google.com/app/apikey)
-2.  Cole a chave no campo **Gemini API Key** dentro do painel do script
+1.  Gere sua chave gratuita no [Google AI Studio](https://openrouter.ai/workspaces/default/keys)
+2.  Cole a chave no campo **OpenRout API Key** dentro do painel do script
 3.  A chave será salva automaticamente nos cookies do navegador
 
 ### Controles do Painel
