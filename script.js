@@ -1,9 +1,8 @@
-
 (function () {
     'use strict';
 
     const APP_ID = 'RedacaoBypass';
-    const COOKIE_NAME = 'rb_Deep_seek_key_v2';
+    const COOKIE_NAME = 'rb_OpenRout_key_v2';
     const REQUIRED_PATH = '/student-write-essay';
 
     // =================================================================
@@ -411,6 +410,7 @@
 
         async fetchOpenRouter(data, isTitle) {
     const url = "https://openrouter.ai/api/v1/chat/completions";
+    const apiKey = document.getElementById("apiKeyInput").value;
 
             let prompt = '';
 
@@ -438,27 +438,46 @@
                 `;
             }
 
-            const response = await fetch(url, {
-                method: "POST",
-                headers: {
+              let result;
+              try {
+                let response = await fetch(url, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${apiKey}`
+                  },
+                  body: JSON.stringify({
+                    model: "openai/gpt-4o-mini",
+                    messages: [{ role: "user", content: prompt }]
+                  })
+               });
+
+               if (!response.ok) throw new Error("Modelo gpt-4o-mini falhou");
+               result = await response.json();
+             } catch (err) {
+            
+            let response = await fetch(url, {
+              method: "POST",
+              headers: {
                 "Content-Type": "application/json",
-                "Authorization": `Bearer ${this.state.apiKey}`
-            },
-            body: JSON.stringify({
-                model: "openai/gpt-4o-mini",
+                "Authorization": `Bearer ${apiKey}`
+              },
+              body: JSON.stringify({
+                model: "openai/gpt-4o",
                 messages: [{ role: "user", content: prompt }]
-            })
-        });
+              })
+            });
 
-        if (!response.ok) {
-            const err = await response.json();
-            throw new Error(err.error?.message || "Erro API");
+            if (!response.ok) {
+              const err = await response.json();
+              throw new Error(err.error?.message || "Erro API");
+            }
+            result = await response.json();
+          }
+
+          return result.choices[0].message.content.trim();
         }
-
-        const result = await response.json();
-        return result.choices[0].message.content.trim();
-    }
-
+        
         enableSelectionMode() {
             document.body.style.cursor = 'crosshair';
             document.addEventListener('click', this.handleSelection, true);
