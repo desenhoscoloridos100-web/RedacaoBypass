@@ -292,7 +292,7 @@
         renderMinimizedView() {
             if (!this.ui) return;
             this.ui.className = 'rb-minimized-bubble';
-            this.ui.innerHTML = `⚡`;
+            this.ui.innerHTML = `⛈️`;
 
             this.applyDrag(this.ui, this.ui);
 
@@ -431,10 +431,11 @@
                     Contexto/Instruções: ${data.textoApoio}.
 
                     IMPORTANTE:
-                    1. NÃO COLOQUE O TÍTULO NO TEXTO.
-                    2. Comece direto no primeiro parágrafo.
+                    1. COLOQUE O TÍTULO NO TEXTO.
+                    2. DEPOIS DO TÍTULO PULE É Comece direto no primeiro parágrafo.
                     3. Sem markdown (negrito, itálico). Texto cru.
                     4. Linguagem natural de estudante.
+                    5. NÃO UTRAPASSE AS PALAVAS SEMPRE DEIXA ENTRE 250 A 350.
                 `;
             }
 
