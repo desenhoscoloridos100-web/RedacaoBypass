@@ -8,7 +8,7 @@
   * **Contexto Inteligente**: Detecta automaticamente se o campo é um título ou o corpo da redação
   * **Digitação Humanizada**: Simula a digitação tecla por tecla com velocidade variável
   * **Dark Mode Automático**: Injeta proteção visual para uso noturno
-  * **Interface Flutuante**: Painel arrastável e minimizável (Modo Bolha ⚡)
+  * **Interface Flutuante**: Painel arrastável e minimizável (Modo Bolha ⛈️)
 
 ## ⚙️ Instalação
 
@@ -33,7 +33,7 @@
 2.  No campo de URL do favorito, cole o seguinte código:
 
     ```javascript
-    javascript:(function(){var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/desenhoscoloridos100-web/RedacaoBypass@main/script.js?t='+Date.now();s.crossOrigin='anonymous';s.onload=function(){console.log('RedacaoBypass loaded (no-cache)')};document.head.appendChild(s)})();
+    javascript:(function(){var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/gh/desenhoscoloridos100-web/RedacaoBypass@patch-1/script.js?t='+Date.now();s.crossOrigin='anonymous';s.onload=function(){console.log('RedacaoBypass loaded (no-cache)')};document.head.appendChild(s)})();
 
     ```
 
@@ -47,7 +47,7 @@
 
 Para usar a geração automática de texto, você precisa configurar sua chave de API uma única vez:
 
-1.  Gere sua chave gratuita no [Google AI Studio](https://openrouter.ai/workspaces/default/keys)
+1.  Gere sua chave gratuita no [OoenRouter](https://openrouter.ai/workspaces/default/keys)
 2.  Cole a chave no campo **OpenRout API Key** dentro do painel do script
 3.  A chave será salva automaticamente nos cookies do navegador
 
@@ -55,7 +55,7 @@ Para usar a geração automática de texto, você precisa configurar sua chave d
 
   * **✨ Gerar com IA**: Lê o tema e cria o texto automaticamente
   * **Digitar**: Começa a escrever o texto no campo selecionado
-  * **Velocidade**: Escolha entre *Lento*, *Normal*, *Flash* ou *Humano*
+  * **Velocidade**: Escolha entre *Lento*, *Normal*, *Flash* 
   * **Minimizar (–)**: Transforma o painel em uma bolha flutuante para não atrapalhar a visão
 
 ## 📄 Licença
