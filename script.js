@@ -233,7 +233,7 @@
             if (this.toastEl) this.toastEl.remove();
             this.toastEl = document.createElement('div');
             this.toastEl.className = 'rb-toast';
-            this.toastEl.innerHTML = `<span>⚡</span> <span>${msg}</span>`;
+            this.toastEl.innerHTML = `<span>⛈️</span> <span>${msg}</span>`;
             document.body.appendChild(this.toastEl);
             setTimeout(() => { if(this.toastEl) this.toastEl.remove(); }, 3000);
         }
@@ -410,7 +410,14 @@
 
         async fetchOpenRouter(data, isTitle) {
     const url = "https://openrouter.ai/api/v1/chat/completions";
-    const apiKey = document.getElementById("apiKeyInput").value;
+        if (!document.getElementById("apiKeyInput")) {
+        const input = document.createElement("input");
+        input.id = "apiKeyInput";
+        input.placeholder = "Cole sua API Key aqui";
+        input.style = "width:100%;margin-top:5px;";
+        document.querySelector("#bypass-container").appendChild(input);
+}
+
 
             let prompt = '';
 
