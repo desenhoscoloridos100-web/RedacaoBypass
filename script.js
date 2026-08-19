@@ -72,8 +72,8 @@
     // 2. LIMPEZA
     // =================================================================
     if (window[APP_ID]) {
-        window[APP_ID].destroy();
-        delete window[APP_ID];
+        try { window[APP_ID].destroy(); } catch(_) {}
+        try { delete window[APP_ID]; } catch(_) { window[APP_ID] = null; }
     }
 
     // =================================================================
@@ -217,7 +217,9 @@
         showErrorModal() {
             const modal = document.createElement('div');
             modal.className = 'rb-error-modal';
-            modal.innerHTML = `<h3 style="color:#ef4444">Local Inválido</h3><p>Use na página de redação.</p><button id="rb-err-close" class="rb-btn rb-btn-action" style="margin:0 auto">OK</button>`;
+            modal.innerHTML = `<h3 style="color:#ef4444">Local Inválido</h3>
+                <p>Use na página de redação.</p>
+                <button id="rb-err-close" class="rb-btn rb-btn-action" style="margin:0 auto">OK</button>`;
             document.body.appendChild(modal);
             document.getElementById('rb-err-close').onclick = () => { modal.remove(); this.destroy(); };
         }
@@ -382,9 +384,10 @@
                    const prompt = Utils.scrapeAssignmentData() || this.state.text;
                    const txt = await this.fetchOpenRouter(prompt, this.state.isTargetTitle);
                    this.state.text = txt;
-                   qs('#rb-input').value = txt;
+                   const inp = qs('#rb-input');
+                   if(inp) inp.value = txt;
                } catch(e) {
-                   alert(e.message);
+                   alert(e.message || e);
                }
                qs('#rb-generate-ai').innerText = 'Gerar com IA';
             };
@@ -409,45 +412,36 @@
         }
 
         async fetchOpenRouter(data, isTitle) {
-    const url = "https://openrouter.ai/api/v1/chat/completions";
-        if (!document.getElementById("apiKeyInput")) {
-        const input = document.createElement("input");
-        input.id = "apiKeyInput";
-        input.placeholder = "Cole sua API Key aqui";
-        input.style = "width:100%;margin-top:5px;";
-        document.querySelector("#bypass-container").appendChild(input);
-}
-
+            const url = "https://openrouter.ai/api/v1/chat/completions";
+            const apiKey = this.state.apiKey;
+            if (!apiKey) throw new Error('API Key ausente. Insira no campo DeepSeek API Key.');
 
             let prompt = '';
 
             if (isTitle) {
-                prompt = `
-                    O usuário precisa de um TÍTULO para uma redação escolar.
-                    Tema: ${data.tema}.
-                    Gênero: ${data.genero}.
-                    Gere APENAS um título criativo, curto e impactante.
-                    NÃO coloque aspas, NÃO coloque a palavra "Título:". Apenas o texto do título.
-                `;
+                prompt = `O usuário precisa de um TÍTULO para uma redação escolar.
+Tema: ${data.tema}.
+Gênero: ${data.genero}.
+Gere APENAS um título criativo, curto e impactante.
+NÃO coloque aspas, NÃO coloque a palavra "Título:". Apenas o texto do título.`;
             } else {
-                prompt = `
-                    Escreva uma redação escolar completa.
-                    Gênero Textual: ${data.genero}.
-                    Tema: ${data.tema}.
-                    Requisitos de tamanho: ${data.palavras}.
-                    Contexto/Instruções: ${data.textoApoio}.
+                prompt = `Escreva uma redação escolar completa.
+Gênero Textual: ${data.genero}.
+Tema: ${data.tema}.
+Requisitos de tamanho: ${data.palavras}.
+Contexto/Instruções: ${data.textoApoio}.
 
-                    IMPORTANTE:
-                    1. COLOQUE O TÍTULO NO TEXTO.
-                    2. DEPOIS DO TÍTULO PULE É Comece direto no primeiro parágrafo.
-                    3. Sem markdown (negrito, itálico). Texto cru.
-                    4. Linguagem natural de estudante.
-                    5. NÃO UTRAPASSE AS PALAVAS SEMPRE DEIXA ENTRE 250 A 350.
-                `;
+IMPORTANTE:
+1. COLOQUE O TÍTULO NO TEXTO.
+2. DEPOIS DO TÍTULO, COMECE DIRETAMENTE NO PRIMEIRO PARÁGRAFO.
+3. Sem markdown (negrito, itálico). Texto cru.
+4. Linguagem natural de estudante.
+5. Mantenha entre 250 e 350 palavras.`;
             }
 
-              let result;
-              try {
+            let result;
+            // primeira tentativa: gpt-4o-mini
+            try {
                 let response = await fetch(url, {
                   method: "POST",
                   headers: {
@@ -460,32 +454,41 @@
                   })
                });
 
-               if (!response.ok) throw new Error("Modelo gpt-4o-mini falhou");
-               result = await response.json();
+               if (response.ok) {
+                   result = await response.json();
+               } else {
+                   // tenta fallback abaixo
+                   const err = await response.json().catch(()=>({}));
+                   console.warn('gpt-4o-mini não ok, tentando fallback', err);
+               }
              } catch (err) {
-            
-            let response = await fetch(url, {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${apiKey}`
-              },
-              body: JSON.stringify({
-                model: "openai/gpt-4o",
-                messages: [{ role: "user", content: prompt }]
-              })
-            });
+               console.warn('Erro no primeiro modelo, tentando fallback', err);
+             }
 
-            if (!response.ok) {
-              const err = await response.json();
-              throw new Error(err.error?.message || "Erro API");
-            }
-            result = await response.json();
-          }
+             // fallback para modelo maior
+             if (!result) {
+                const response = await fetch(url, {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${apiKey}`
+                  },
+                  body: JSON.stringify({
+                    model: "openai/gpt-4o",
+                    messages: [{ role: "user", content: prompt }]
+                  })
+                });
 
-          return result.choices[0].message.content.trim();
+                if (!response.ok) {
+                  const err = await response.json().catch(()=>({}));
+                  throw new Error(err.error?.message || "Erro API");
+                }
+                result = await response.json();
+             }
+
+             return result?.choices?.[0]?.message?.content?.trim() || '';
         }
-        
+
         enableSelectionMode() {
             document.body.style.cursor = 'crosshair';
             document.addEventListener('click', this.handleSelection, true);
@@ -529,7 +532,8 @@
 
         async runTyping(text) {
             this.state.isTyping = true; this.state.index = 0;
-            const tgt = this.state.target; tgt.focus();
+            const tgt = this.state.target; if (!tgt) return;
+            tgt.focus();
             if(tgt.value !== undefined) this.forceReactChange(tgt, '');
 
             while(this.state.index < text.length && this.state.isTyping) {
@@ -582,7 +586,7 @@
             this.disableSelectionMode();
             if(this.toastEl) this.toastEl.remove();
             if(this.ui) this.ui.remove();
-            window[APP_ID] = null;
+            try { delete window[APP_ID]; } catch(_) { window[APP_ID] = null; }
         }
     }
     window[APP_ID] = new RedacaoBypassEngine();
